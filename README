@@ -1,4 +1,4 @@
-WebService/Nextbus/Agency version 0.02
+WebService/Nextbus/Agency version 0.10
 ===============================
 
 This is a superclass which is currently more useful when initialized through
@@ -21,9 +21,9 @@ To install to a non-standard location use one of the following:
 
 DEPENDENCIES
 
-None.
+Storable
 
 COPYRIGHT AND LICENSE
 
 Licensed by Creative Commons
-http://creativecommons.org/licenses/by-nc-sa/1.0/
+http://creativecommons.org/licenses/by-nc-sa/2.0/

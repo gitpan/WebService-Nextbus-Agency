@@ -1,12 +1,8 @@
 Agency.pm
+Agency/SFMUNI.pm
+Agency/SFMUNI.store
 Changes
 MANIFEST
 Makefile.PL
 README
-SFMUNI/Changes
-SFMUNI/MANIFEST
-SFMUNI/Makefile.PL
-SFMUNI/README
-SFMUNI/SFMUNI.pm
-SFMUNI/test.pl
 test.pl

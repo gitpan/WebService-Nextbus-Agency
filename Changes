@@ -7,3 +7,10 @@ Revision history for Perl extension WebService::Nextbus::Agency.
 0.02 12/6/03
 	- can use the helper data in WebService::Nextbus::Agency::SFMUNI.  No
 	other functionality.
+
+0.10 7/12/04
+	- Had to redo whole tree structure for SFMUNI due to changes in website.
+	Went ahead and finally coded the WebService::Nextbus module so that this
+	redo would be easy.  Subsequently changed the implementation of SFMUNI
+	so that it now loads its tree from a stored serialized data file.  Thus
+	we now require the Storable module, but this is pretty standard.

@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
      
-our $VERSION = '0.02';
+our $VERSION = '0.10';
 
 sub new {
 	my $proto = shift;
@@ -18,12 +18,14 @@ sub new {
 	bless ($self, $class);
 }
 
+# Input or check the name code for this agency, e.g. sf-muni
 sub nameCode {
 	my $self = shift;
 	if (@_) { $self->{_nameCode} = shift }
 	return $self->{_nameCode};
 }
 
+# Input or chcek the RegExps used for default parsing
 sub routeRegExp {
 	my $self = shift;
 	if (@_) { $self->{_routeRegExp} = shift }
@@ -36,6 +38,7 @@ sub dirRegExp {
 	return $self->{_dirRegExp};
 }
 
+# For building or checking the tree structure of routes, dirs, stops
 sub routes {
 	my $self = shift;
 	if (@_) { %{$self->{_routes}} = %{$_[0]} }
@@ -63,6 +66,7 @@ sub stopCode {
 	return $self->stops($route, $dir)->{$stopName};
 }
 
+# Spit out the stop names (keys) or codes (values)
 sub allStopNames {
 	my $self = shift;
 	my ($route, $dir) = @_;
@@ -75,26 +79,32 @@ sub allStopCodes {
 	return values(%{$self->stops($route, $dir)});
 }
 
+# Default parsing of input string according to object's stored RegExps
 sub parseRoute {
 	my $self = shift;
 	my ($str) = @_;
-      my $routeRegExp = $self->routeRegExp();
-      my ($route) = ($str =~ /$routeRegExp/i);
+	my $routeRegExp = $self->routeRegExp();
+	my ($route) = ($str =~ /$routeRegExp/i);
 
 	$str =~ s/$route\s*//;
 	return (ucfirst($route), $str);
 }
-      
+	
 sub parseDir {
-      my $self = shift;                        
-      my ($str) = @_;                   
-      my $dirRegExp = $self->dirRegExp();
-      my ($dir) = ($str =~ /$dirRegExp/i);
+	my $self = shift;				
+	my ($str) = @_;			 
+	my $dirRegExp = $self->dirRegExp();
+	my ($dir) = ($str =~ /$dirRegExp/i);
 
 	$str =~ s/$dir\s*//;
-      return (ucfirst($dir), $str);
+	return (ucfirst($dir), $str);
 }
 
+# Search for stopCodes in current tree.  First, check whether the input string
+# directly matches a stop code.  Otherwise, assume the input string is a stop
+# name and search the names for a match.  The matching is done word by word:
+# first split the input at whitespaces, then match each in turn, narrowing the
+# list of stopnames at each step.  At the end, return all remaining matches.
 sub str2stopCodes {
 	my $self = shift;
 	my ($route, $dir, $stopStr) = @_;
@@ -129,9 +139,9 @@ sub routesAsString {
 			print "	$dirKey =>\n";
 			my $dirVal = $routeVal->{$dirKey};
 			foreach my $stopKey (keys(%$dirVal)) {
-				print "		$stopKey => ";
+				print "		'$stopKey' => ";
 				my $stopVal = $dirVal->{$stopKey};
-				print $stopVal . "\n";
+				print "'$stopVal'" . "\n";
 			}
 		}
 	}
@@ -149,7 +159,7 @@ WebService::Nextbus::Agency - Superclass for data structures designed for Nextbu
 
   use WebService::Nextbus::Agency::SFMUNI;
   $muniAgency = new WebService::Nextbus::Agency::SFMUNI;
-  @stopCodes = $muniAgency->str2stopCodes('N', 'O', 'Duboce and Fillmore');
+  @stopCodes = $muniAgency->str2stopCodes('N', 'judah', 'Duboce and Fillmore');
 
 C<$stopCodes> can now be used as valid GET arguments on the nextbus webpage.
 
@@ -192,13 +202,13 @@ None.
 
 =head1 AUTHOR
 
-Peter H. Li<lt>pli9+CODE@spam-guard.itsa.ucsf.edu<gt>
+Peter H. Li<lt>phli@cpan.org<gt>
 
 
 =head1 COPYRIGHT
 
 Licensed by Creative Commons
-http://creativecommons.org/licenses/by-nc-sa/1.0/
+http://creativecommons.org/licenses/by-nc-sa/2.0/
 
 =head1 SEE ALSO
 
