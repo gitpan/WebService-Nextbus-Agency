@@ -6,7 +6,7 @@ use integer;
 use Storable;
 use base qw(WebService::Nextbus::Agency);
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 sub new {
 	my $proto = shift;
@@ -15,8 +15,9 @@ sub new {
 	my $self = $class->SUPER::new;
 	$self->nameCode('sf-muni');
 	$self->routeRegExp('([fjklmns]|22)');
-	$self->dirRegExp('(fishwarf|castro|downtown|balboa|zoo|caltrain|judah|castro|marina|3rdstreet|[ins])');
+	$self->dirRegExp('(fishwarf|castro|downtown|balboa|zoo|caltrain|judah|castro|marina|3rdstreet|[34bcdfijmnsz])');
 
+	# This hack is the only way I could figure to find the serialized data
 	my $fileDir = $INC{'WebService/Nextbus/Agency/SFMUNI.pm'};
 	$fileDir =~ s/SFMUNI.pm$//;
 	$self->routes(retrieve($fileDir . 'SFMUNI.store'));
@@ -24,17 +25,31 @@ sub new {
 	bless ($self, $class);
 }
 
+# A little hacking by an SF native for convenience
 sub parseDir {
 	my $self = shift;
 	my ($str) = @_;  
 	my $dirRegExp = $self->dirRegExp();   
-	my ($dir) = ($str =~ /$dirRegExp/i);
- 
-	$str =~ s/$dir\s*//;
 
-	if ($dir eq 'I') { $dir = 'downtown' }
-	if ($dir eq 'N') { $dir = 'marina' }
-	if ($dir eq 'S') { $dir = '3rdstreet' }
+	my ($dir) = ($str =~ /$dirRegExp/i);
+	$str =~ s/$dir\s*//;
+	$dir = lc($dir);
+
+	# Various translations for limited backward compatibility
+	if ($dir eq 'i') { $dir = 'downtown' }
+	if ($dir eq 'n') { $dir = 'marina' }
+	if ($dir eq 's') { $dir = 'marina' }
+
+	# Standard translations
+	if ($dir eq '3') { $dir = '3rdstreet' }
+	if ($dir eq '4') { $dir = 'caltrain' } # 4 for 4th and King
+	if ($dir eq 'b') { $dir = 'balboa' }
+	if ($dir eq 'c') { $dir = 'castro' }
+	if ($dir eq 'd') { $dir = 'downtown' }
+	if ($dir eq 'f') { $dir = 'fishwarf' }
+	if ($dir eq 'j') { $dir = 'judah' }
+	if ($dir eq 'm') { $dir = 'marina' }
+	if ($dir eq 'z') { $dir = 'zoo' }
 
 	return ($dir, $str);
 }
@@ -57,28 +72,21 @@ C<$stopCodes> can now be used as valid GET arguments on the nextbus webpage.
 
 =head1 DESCRIPTION
 
-Objects of the SFMUNI class are WebService::Nextbus::Agency inheritors and 
+Objects of the SFMUNI class are L<WebService::Nextbus::Agency> inheritors and 
 already know much of the data about sf-muni, e.g. available routes, stops, etc..
 
-WebService::Nextbus::Agency is conceived as a class of object used by 
-WebService::Nextbus to store and intelligently recall the information that 
-WebService::Nextbus will download from the Nextbus website.  It class can also 
-be used by initializing inheriting helper classes that will automatically load 
-up the data relevant for the given agency.
-
-However, the WebService::Nextbus package is not released yet, so the 
-functionality of WebService::Nextbus::Agency is currently limited to the second 
-method.  Further, the only helper inheriting class I've written thus far is the 
-class for the San Francisco MUNI agency (sf-muni).  This subclass is available 
-as L<WebService::Nextbus::Agency::SFMUNI>.
+WebService::Nextbus::Agency is a class used as a data structure to store and 
+intelligently recall the information that L<WebService::Nextbus> will download 
+from the Nextbus website.  It class can also be used by initializing inheriting 
+helper subclasses such as SFMUNI, which will automatically load up the data 
+relevant for the given agency without having to go to the web.
 
 The L</SYNOPSIS> indicates how the object can be used to retrieve the GET
 argument that the website requires for returning GPS information for a 
 particular stop on a particular route of the sf-muni agency.  Once the proper
 GET code has been retrieved, a web useragent can use the argument to build
 a URL for the desired information.  This is another function that will 
-eventually be provided by WebService::Nextbus by making WebService::Nextbus an 
-LWP::UserAgent.
+eventually be provided by WebService::Nextbus. 
 
 
 =head2 EXPORT
@@ -87,11 +95,19 @@ None by default.
 
 
 =head1 ERROR CHECKING
+
 Watch out!  No error checking yet...
+
 
 =head1 REQUIRES
 
-L<WebService::Nextbus::Agency>
+Started using serialized data via L<Storable> for storing and retrieving the
+prepared agency data.
+
+Requires and packaged with L<WebService::Nextbus::Agency>.
+
+Tests (packages with Agency) require Test::More.
+
 
 =head1 AUTHOR
 
@@ -103,9 +119,10 @@ Peter H. Li<lt>phli@cpan.org<gt>
 Licensed by Creative Commons
 http://creativecommons.org/licenses/by-nc-sa/2.0/
 
+
 =head1 SEE ALSO
 
-L<WebService::Nextbus::Agency>, L<perl>.
+L<WebService::Nextbus::Agency>, L<Storable>, L<perl>.
 
 =cut
 ~

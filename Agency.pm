@@ -2,8 +2,9 @@ package WebService::Nextbus::Agency;
 use 5.006;
 use strict;
 use warnings;
+use integer;
      
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 sub new {
 	my $proto = shift;
@@ -25,7 +26,7 @@ sub nameCode {
 	return $self->{_nameCode};
 }
 
-# Input or chcek the RegExps used for default parsing
+# Input or check the RegExps used for default parsing
 sub routeRegExp {
 	my $self = shift;
 	if (@_) { $self->{_routeRegExp} = shift }
@@ -59,6 +60,7 @@ sub stops {
 	return \%{$self->dirs($route)->{$dir}};
 }
 
+# Input or check a particular stop code given the route, dir, and name of stop.
 sub stopCode {
 	my $self = shift;
 	my ($route, $dir, $stopName, $newCode) = @_;
@@ -89,7 +91,7 @@ sub parseRoute {
 	$str =~ s/$route\s*//;
 	return (ucfirst($route), $str);
 }
-	
+
 sub parseDir {
 	my $self = shift;				
 	my ($str) = @_;			 
@@ -97,14 +99,15 @@ sub parseDir {
 	my ($dir) = ($str =~ /$dirRegExp/i);
 
 	$str =~ s/$dir\s*//;
-	return (ucfirst($dir), $str);
+	return ($dir, $str);
 }
 
-# Search for stopCodes in current tree.  First, check whether the input string
+# Search for stop codes in current tree.  First, check whether the input string
 # directly matches a stop code.  Otherwise, assume the input string is a stop
 # name and search the names for a match.  The matching is done word by word:
-# first split the input at whitespaces, then match each in turn, narrowing the
-# list of stopnames at each step.  At the end, return all remaining matches.
+# first split the input at whitespaces, then match each word in turn, narrowing
+# the list of stopnames at each step (but if the word makes no matches, then
+# leave the list alone).  At the end, return all remaining matches.
 sub str2stopCodes {
 	my $self = shift;
 	my ($route, $dir, $stopStr) = @_;
@@ -129,6 +132,8 @@ sub str2stopCodes {
 	return @retCodes;
 }
 
+# To dump the routes tree in human readable format.  Essentially the same as
+# Data::Dumper in case you don't want to load that library.
 sub routesAsString {
 	my $self = shift;
 
@@ -139,9 +144,9 @@ sub routesAsString {
 			print "	$dirKey =>\n";
 			my $dirVal = $routeVal->{$dirKey};
 			foreach my $stopKey (keys(%$dirVal)) {
-				print "		'$stopKey' => ";
+				print "		$stopKey => ";
 				my $stopVal = $dirVal->{$stopKey};
-				print "'$stopVal'" . "\n";
+				print $stopVal . "\n";
 			}
 		}
 	}
@@ -157,48 +162,70 @@ WebService::Nextbus::Agency - Superclass for data structures designed for Nextbu
 
 =head1 SYNOPSIS
 
+  use WebService::Nextbus;
+  $nb = new WebService::Nextbus;
+  $nb->buildAgency('sf-muni'); # Scraping the webpages repeatedly can take time
+  @stops = $nb->agencies->{'sf-muni'}->str2stopCodes('N', 'judah', 'Chu Dub');
+
+  # OR...
+
   use WebService::Nextbus::Agency::SFMUNI;
   $muniAgency = new WebService::Nextbus::Agency::SFMUNI;
-  @stopCodes = $muniAgency->str2stopCodes('N', 'judah', 'Duboce and Fillmore');
+  @stops = $muniAgency->str2stopCodes('N', 'judah', 'Church and Duboce');
 
-C<$stopCodes> can now be used as valid GET arguments on the nextbus webpage.
+C<@stops> can now be used as valid GET arguments on the nextbus webpage.
 
 
 =head1 DESCRIPTION
 
-WebService::Nextbus::Agency is conceived as a class of object used by 
-WebService::Nextbus to store and intelligently recall the information that 
-WebService::Nextbus will download from the Nextbus website.  It class can also 
-be used by initializing inheriting helper classes that will automatically load 
-up the data relevant for the given agency.
-
-However, the WebService::Nextbus package is not released yet, so the 
-functionality of WebService::Nextbus::Agency is currently limited to the second 
-method.  Further, the only helper inheriting class I've written thus far is the 
-class for the San Francisco MUNI agency (sf-muni).  This subclass is available 
-as L<WebService::Nextbus::Agency::SFMUNI>.
+WebService::Nextbus::Agency implements a basic data structure for storing and
+retrieving information on the various agencies monitored by the Nextbus website
+(www.nextbus.com).  Nextbus provides a GPS system for predicting the arrival
+times of transit vehicles.  In order to screen scrape the website effectively,
+one must be familiar with the GET arguments used by the site.  This module
+provides the data structure for storing this info once it has been determined
+for a particular transit agency.
 
 The L</SYNOPSIS> indicates how the object can be used to retrieve the GET 
 argument that the website requires for returning GPS information for a 
-particular stop on a particular route of the sf-muni agency.  Once the proper
-GET code has been retrieved, a web useragent can use the argument to build
-a URL for the desired information.  This is another function that will 
-eventually be provided by WebService::Nextbus by making WebService::Nextbus an 
-LWP::UserAgent.
+particular stop on a particular route of the sf-muni agency.  There are 
+basically two methods: determine the relevant GET arguments by screen scraping
+the Nextbus website using L<WebService::Nextbus>, or load a prepared data
+structure from a helper subclass.  
 
+So far, only the L<WebService::Nextbus::Agency::SFMUNI> subclass has been 
+implemented.  With the screen scraping of WebService::Nextbus available, 
+however, it should be simple to create more helper subclasses by running 
+WebService::Nextbus->buildAgency for the agency of choice and then using 
+Storable to serialize the resulting routes tree for retrieval by the new helper 
+subclass.
+
+Once the proper GET code has been retrieved, a web useragent can use the 
+argument to build a URL for the desired information.  This useragent function 
+will probably eventually be incorporated into L<WebService::Nextbus>, which is 
+already a L<LWP::UserAgent>.
+
+The entire functionality of this module will eventually be made obsolete by the
+anticipated development of an official WebService (W3C standard) by the Nextbus
+team.  However, this is useful in the interim, and if Nextbus ends up charging
+for their service, then this will continue to be developed.
 
 =head2 EXPORT
 
-None by default.
+None by default; OO interface.
 
 
 =head1 ERROR CHECKING
 
 Watch out!  No error checking yet...
 
+
 =head1 REQUIRES
 
-None.
+Tests require the Test::More module.
+Subclass SFMUNI (and likely any additional subclasses created for other
+agencies) requires the L<Storable> module. 
+
 
 =head1 AUTHOR
 
@@ -210,9 +237,11 @@ Peter H. Li<lt>phli@cpan.org<gt>
 Licensed by Creative Commons
 http://creativecommons.org/licenses/by-nc-sa/2.0/
 
+
 =head1 SEE ALSO
 
-L<WebService::Nextbus::Agency::SFMUNI>, L<perl>.
+L<WebService::Nextbus>, L<WebService::Nextbus::Agency::SFMUNI>, L<Storable>, 
+L<LWP::UserAgent>, L<perl>.
 
 =cut
 ~

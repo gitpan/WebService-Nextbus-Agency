@@ -1,9 +1,11 @@
-WebService/Nextbus/Agency version 0.10
+WebService/Nextbus/Agency version 0.11
 ===============================
 
-This is a superclass which is currently more useful when initialized through
-one of its helper inheriting classes.  All available helper classes will be
-packaged with this.  See WebService::Nextbus::Agency::SFMUNI.
+This class provides the data structure for storing information for querying the
+Nextbus website (www.nextbus.com).  The structure can be filled either by a 
+helper subclass, or through the screen scraper WebService::Nextbus.
+
+See WebService::Nextbus or WebService::Nextbus::Agency::SFMUNI.
 
 INSTALLATION
 
@@ -21,7 +23,8 @@ To install to a non-standard location use one of the following:
 
 DEPENDENCIES
 
-Storable
+The tests use Test::More.
+The helper subclasses require Storable to deserialize their agency information.
 
 COPYRIGHT AND LICENSE
 
