@@ -1,0 +1,29 @@
+WebService/Nextbus/Agency version 0.02
+===============================
+
+This is a superclass which is currently more useful when initialized through
+one of its helper inheriting classes.  All available helper classes will be
+packaged with this.  See WebService::Nextbus::Agency::SFMUNI.
+
+INSTALLATION
+
+To install this module type the following:
+
+	perl Makefile.PL
+	make
+	make test
+	make install
+
+To install to a non-standard location use one of the following:
+
+	perl Makefile.PL LIB=<MYLIB>
+	perl Makefile.PL PREFIX=<MYPREFIX>
+
+DEPENDENCIES
+
+None.
+
+COPYRIGHT AND LICENSE
+
+Licensed by Creative Commons
+http://creativecommons.org/licenses/by-nc-sa/1.0/

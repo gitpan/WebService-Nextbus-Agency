@@ -1,0 +1,9 @@
+Revision history for Perl extension WebService::Nextbus::Agency.
+
+0.01	Sat Dec  6 06:25:13 2003
+	- original version; created by h2xs 1.21 with options
+		-AXnWebService::Nextbus::Agency
+
+0.02 12/6/03
+	- can use the helper data in WebService::Nextbus::Agency::SFMUNI.  No
+	other functionality.
