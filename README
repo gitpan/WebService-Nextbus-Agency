@@ -1,5 +1,5 @@
-WebService/Nextbus/Agency version 0.11
-===============================
+WebService/Nextbus/Agency version 0.12
+======================================
 
 This class provides the data structure for storing information for querying the
 Nextbus website (www.nextbus.com).  The structure can be filled either by a 

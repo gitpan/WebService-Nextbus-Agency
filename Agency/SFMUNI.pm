@@ -6,7 +6,7 @@ use integer;
 use Storable;
 use base qw(WebService::Nextbus::Agency);
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 sub new {
 	my $proto = shift;

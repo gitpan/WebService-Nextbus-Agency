@@ -19,3 +19,7 @@ Revision history for Perl extension WebService::Nextbus::Agency.
 
 0.11 7/14/04
 	- More small coding improvements to SFMUNI and a lot better documentation
+
+0.12 7/14/04
+	- Changed stored data to Storable->nstore to try to improve architecture
+	interoperability for SFMUNI.
